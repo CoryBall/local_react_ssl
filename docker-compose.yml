@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+  web_ui:
+    container_name: web_ui
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    env_file:
+      - .env
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - './src:/app/src'
+  nginx:
+    container_name: proxy
+    image: nginx:stable-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - './nginx.conf:/etc/nginx/conf.d/default.conf'
+      - './local_certs/certificate.crt:/etc/nginx/certificate.crt'
+      - './local_certs/private.key:/etc/nginx/private.key'
+    depends_on:
+      - web_ui
